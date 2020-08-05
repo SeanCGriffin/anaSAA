@@ -1,13 +1,7 @@
 #!/usr/bin/env python
 
-import glob
 import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
-
-
-import time, sys
-from IPython.display import clear_output
 
 import argparse
 
@@ -45,19 +39,10 @@ def main(lrs_file, output=None):
                 elif len(l) == 4:
                     a = int(l[1])
                     b = int(l[2])
-                    #print(2*(i-4), 2*(i-4)+1,a, b)
                     lrs_list += [a, b]
                 else:
                     continue
-                    #print("Do nothing with this line.")
-                    #print(lrs_list)
 
-                #f l > 2e8:
-                #   print(l)
-                #print(l)
-                #if i > 40:
-                #    print(t, lrs)
-                #    break
     df.columns=["time_lrs"] + [f'ch{i:02d}' for i in range(len(df.columns)-1)]            
     df.info()    
 
