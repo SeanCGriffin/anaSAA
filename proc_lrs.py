@@ -2,17 +2,23 @@
 
 import numpy as np
 import pandas as pd
-
+import os
 import argparse
 
 def main(lrs_file, output=None):
+
+    if output is None:
+
+        output = 'raw.csv'
+        print(f"No output file specified; writing to {output}.")
+        if os.path.exists(output):
+            print(f"Default output file exists, deleting...")
+            os.remove(output)    
 
     with open(lrs_file, 'r') as f:
         file_list = f.readlines()
         file_list = [l.rstrip() for l in file_list]
     
-
-    df = pd.DataFrame()
     t0 = None
 
     i = 0
@@ -21,6 +27,7 @@ def main(lrs_file, output=None):
 
     for index,file in enumerate(file_list):
         print(f"Processing {file}. Progess {index+1}/{len(file_list)}.")
+        df = pd.DataFrame()
         with open(file) as f:
             for line in f:
                 #Capture the line and turn it into an array.
@@ -43,14 +50,15 @@ def main(lrs_file, output=None):
                 else:
                     continue
 
-    df.columns=["time_lrs"] + [f'ch{i:02d}' for i in range(len(df.columns)-1)]            
-    df.info()    
 
-    if output is None:
-        df.to_csv('raw.csv', sep=',', index=False)
-    else:
-        df.to_csv(output, sep=',', index=False)
 
+        with open(output, 'a') as f:
+            df.columns=["time_lrs"] + [f'ch{i:02d}' for i in range(len(df.columns)-1)]
+            #Write to disk, do not write header if the file is being created
+            df.to_csv(f, header=f.tell()==0, index=False, sep=',')
+            print(f"Outputting dataframe to {output}...")
+
+    print("Done!")
     return
 
 if __name__ == "__main__":
@@ -66,5 +74,11 @@ if __name__ == "__main__":
     if not args.lrs:
         print("LRS data filename required!")
         exit()
+
+    if args.output:
+        if os.path.exists(args.output):
+            print(f"Output file {args.output} exists. Please remove before continuing with this filename.")
+            exit()
+
 
     main(args.lrs, args.output)
