@@ -59,7 +59,7 @@ if __name__ == "__main__":
     years = []
     for year in args.date:
         if len(year) == 4:
-            years += [year + "0101"]
+            years += [year + "-01-01"]
         else:
             years += [year]
 

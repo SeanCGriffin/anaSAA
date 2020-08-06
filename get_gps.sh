@@ -1,7 +1,7 @@
 #! /bin/bash
 
 if [ $# -ne 3 ] ; then
-    echo "Usage: $0 <output> <YYYYMMDD> <delta_in_days>"
+    echo "Usage: $0 <output> <YYYY-MM-DD> <delta_in_days>"
     exit -1
 fi
 
