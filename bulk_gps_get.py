@@ -14,7 +14,7 @@ def run_scr_star(inputs):
 
 def run_scr(year, delta, output):
     print(year)
-    call_str = "get_gps.sh {0}/ {1} {2}".format(output, year, delta)
+    call_str = "./get_gps.py {0}/ {1} {2}".format(output, year, delta)
     print(call_str)
     subprocess.call(call_str, shell=True)
     
@@ -58,9 +58,9 @@ if __name__ == "__main__":
     years = []
     for year in args.date:
         if len(year) == 4:
-            years += [year + "0101"]
+            years += [year + "-01-01"]
         else:
-            #year = year[0:4] + '-' + year[4:6] + '-' + year[6::]
+            year = year[0:4] + '-' + year[4:6] + '-' + year[6::]
             years += [year]
 
     print(years)
