@@ -58,9 +58,9 @@ if __name__ == "__main__":
     years = []
     for year in args.date:
         if len(year) == 4:
-            years += [year + "-01-01"]
+            years += [year + "0101"]
         else:
-            year = year[0:4] + '-' + year[4:6] + '-' + year[6::]
+            #year = year[0:4] + '-' + year[4:6] + '-' + year[6::]
             years += [year]
 
     print(years)
@@ -68,8 +68,5 @@ if __name__ == "__main__":
 
     pool = Pool(processes=args.jobs)
     pool.map(run_scr_star, zip(years, repeat(args.delta), repeat(output_dir)))
-
-            #pool.map(runRevan_star,
-            #         zip(simFiles,repeat(args.revanCfg),repeat(args.geoFile)))    
 
     print("Done. Exiting...")
