@@ -20,4 +20,3 @@ print("Pulling GPS info for {0} + {1} days and storing to: {2}".format(DATE, DEL
 command_str = "MnemRet.py -b '{0} 00:00:00' -e '+{1} day' --csv {2} SGPSBA_SECONDS SGPSBA_SUBSECS SGPSBA_POSITIONX SGPSBA_POSITIONY SGPSBA_POSITIONZ"
 
 os.system(command_str.format(DATE, DELTA, OUTPUT_FILE))
-#export COMMAND=""
