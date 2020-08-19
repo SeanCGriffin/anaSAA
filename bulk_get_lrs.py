@@ -22,10 +22,13 @@ def run_scr(output_dir, subsystem, year_month):
     #print(year, month)
 
     target_file = "{0}/{1}LRS_{2}_{3}.list".format(output_dir, subsystem, year, month)
-    call_str = "./make_filelist.sh {0} {1} {2}".format(subsystem, year, month)
+    call_str = "./make_filelist.sh {0} {1} {2} > {3}".format(subsystem, year, month, target_file)
+
     print(call_str)
 
     subprocess.call(call_str, shell=True)
+
+    #plrs.process_runlist(target_file, output=output_dir):
     
 def main():
 
