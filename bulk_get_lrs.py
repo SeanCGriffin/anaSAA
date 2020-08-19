@@ -16,7 +16,7 @@ import proc_lrs as plrs
 def run_scr_star(inputs):
     run_scr(*inputs)
 
-def run_scr(output_dir, subsystem, year_month):
+def run_scr(output_dir, subsystem, year_month, listonly):
     year = year_month[0]
     month = year_month[1]
     #print(year, month)
@@ -28,7 +28,8 @@ def run_scr(output_dir, subsystem, year_month):
 
     subprocess.call(call_str, shell=True)
 
-    #plrs.process_runlist(target_file, output=output_dir):
+    if not listonly:
+        plrs.process_runlist(target_file, output=output_dir)
     
 def main():
 
@@ -45,7 +46,7 @@ if __name__ == "__main__":
     parser.add_argument("-i", "--input", type=str, default="./analysis/GPS*.csv", help="Input directory in which to search for GPS files. All GPS files will have LRS data processed.")
     parser.add_argument("-o", "--output", type=str, default="./lrs/", help="Output directory")
     parser.add_argument("-s", "--subsystem", type=str, default="CAL", help="Subsystem: TKR, CAL, ACD")
-    parser.add_argument("-l", "--listonly", type=bool, default= False, help="Generate filelists only.")
+    parser.add_argument("-l", "--listonly", type=bool, default=True, help="Generate filelists only.")
 
     args = parser.parse_args()
     print(args) 
@@ -72,14 +73,15 @@ if __name__ == "__main__":
         print("No input directory specified.")
         exit()
     else:
-        GPS_files = sorted(glob.glob(args.input))
+        GPS_files = sorted(glob.glob(args.input+"*.csv"))
         if len(GPS_files) == 0:
             print("NO GPS files found in directory. Exiting...")
         else:
             print("{0} files found in input directory:".format(len(GPS_files)))
             for f in GPS_files: 
                 print(f)
-                date = f.split("_")[1]
+                date = f.split("/")[-1].split("_")[1]
+                print(date)
                 year, month, day = date.split('-')
                 year_month += [(year, month)]
 
@@ -87,6 +89,6 @@ if __name__ == "__main__":
 
     pool = Pool(processes=args.jobs)
     #pool.map(run_scr_star, zip(repeat(output_dir), repeat(args.delta), repeat(output_dir)))
-    pool.map(run_scr_star, zip(repeat(output_dir), repeat(args.subsystem), year_month))
+    pool.map(run_scr_star, zip(repeat(output_dir), repeat(args.subsystem), year_month, repeat(args.listonly)))
 
     print("Done. Exiting...")
