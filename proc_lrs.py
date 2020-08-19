@@ -5,7 +5,7 @@ import pandas as pd
 import os
 import argparse
 
-def main(lrs_file, output=None):
+def process_runlist(lrs_file, output=None):
 
     if output is None:
 
@@ -98,4 +98,4 @@ if __name__ == "__main__":
             exit()
 
 
-    main(args.lrs, args.output)
+    process_runlist(args.lrs, args.output)
