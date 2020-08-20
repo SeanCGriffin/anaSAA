@@ -17,6 +17,9 @@ def run_scr_star(inputs):
     run_scr(*inputs)
 
 def run_scr(output_dir, subsystem, year_month, listonly):
+
+    tStart = time.time()
+
     year = year_month[0]
     month = year_month[1]
     #print(year, month)
@@ -28,8 +31,14 @@ def run_scr(output_dir, subsystem, year_month, listonly):
 
     subprocess.call(call_str, shell=True)
 
-    if not listonly:
-        plrs.process_runlist(target_file, output=output_dir)
+    if listonly: 
+        print("Generating runlist only...")
+    else:
+        plrs.process_runlist(target_file, output=f"{output_dir}/{subsystem}LRS_{year}_{month}.csv")
+
+    deltaT = time.time() - tStart
+
+    print(f"Done with {target_file}! Time taken: {deltaT:.1f} seconds.")
     
 def main():
 
@@ -46,7 +55,7 @@ if __name__ == "__main__":
     parser.add_argument("-i", "--input", type=str, default="./analysis/GPS*.csv", help="Input directory in which to search for GPS files. All GPS files will have LRS data processed.")
     parser.add_argument("-o", "--output", type=str, default="./lrs/", help="Output directory")
     parser.add_argument("-s", "--subsystem", type=str, default="CAL", help="Subsystem: TKR, CAL, ACD")
-    parser.add_argument("-l", "--listonly", type=bool, default=True, help="Generate filelists only.")
+    parser.add_argument("-l", "--listonly", default=False, action='store_true', help="Generate filelists only.")
 
     args = parser.parse_args()
     print(args) 
@@ -73,7 +82,7 @@ if __name__ == "__main__":
         print("No input directory specified.")
         exit()
     else:
-        GPS_files = sorted(glob.glob(args.input+"*.csv"))
+        GPS_files = sorted(glob.glob(args.input+"GPS*.csv"))
         if len(GPS_files) == 0:
             print("NO GPS files found in directory. Exiting...")
         else:

@@ -48,7 +48,8 @@ def process_runlist(lrs_file, output=None):
                         for i,val in enumerate(lrs_arr[0]):
                             if val == -999:
                                 n_ch = i
-                                print(f"Detected number of channels in dataset: {n_ch}")
+                                if nfiles_done == 0:
+                                    print(f"Detected number of channels in dataset: {n_ch}")
                                 break                
                     
                 elif len(l) == 4:
@@ -73,7 +74,7 @@ def process_runlist(lrs_file, output=None):
                 df.columns=["time_lrs"] + [f'ch{i:02d}' for i in range(len(df.columns)-1)]
                 #Write to disk, do not write header if the file is being created
                 df.to_csv(f, header=f.tell()==0, index=False, sep=',')
-                print(f"Outputting dataframe to {output}...")  
+                #print(f"Outputting dataframe to {output}...")  
 
     print("Done!")
     return
