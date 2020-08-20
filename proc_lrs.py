@@ -5,15 +5,18 @@ import pandas as pd
 import os
 import argparse
 
-def process_runlist(lrs_file, output=None):
+def process_runlist(lrs_file, output=None, write_csv=False):
 
     if output is None:
 
-        output = 'raw.csv'
+        output = 'raw'
         print(f"No output file specified; writing to {output}.")
-        if os.path.exists(output):
+        if os.path.exists(f"{output}.csv"):
             print(f"Default output file exists, deleting...")
-            os.remove(output)    
+            os.remove(f"{output}.csv")    
+        if os.path.exists(f"{output}.h5"):
+            print(f"Default output h5 file exists, deleting...")
+            os.remove(f"{output}.h5")
 
     with open(lrs_file, 'r') as f:
         file_list = f.readlines()
@@ -69,22 +72,32 @@ def process_runlist(lrs_file, output=None):
             lrs_df = pd.DataFrame(lrs_arr)
             df = pd.concat([t_df, lrs_df], axis=1)        
             
-            with open(output, 'a') as f:
-                
+            
+            if write_csv:
+                #tnow = time.time()
+                with open(f"{output}.csv", 'a') as f:
+
+                    df.columns=["time_lrs"] + [f'ch{i:02d}' for i in range(len(df.columns)-1)]
+                    #Write to disk, do not write header if the file is being created
+                    df.to_csv(f, header=f.tell()==0, index=False, sep=',')
+                    #print(f"Outputting dataframe to {output}...")
+                #print(time.time()-tnow)
+            else:
+                #tnow = time.time()
                 df.columns=["time_lrs"] + [f'ch{i:02d}' for i in range(len(df.columns)-1)]
-                #Write to disk, do not write header if the file is being created
-                df.to_csv(f, header=f.tell()==0, index=False, sep=',')
-                #print(f"Outputting dataframe to {output}...")  
+                df.to_hdf(f"{output}.h5", key='tll', format='table', append=True, complevel=5)
+                #print(time.time()-tnow)                
 
     print("Done!")
     return
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description="Load and merge TLL and TLRS data files.")
+    parser = argparse.ArgumentParser(description="Read LRS files ")
 
-    parser.add_argument("--lrs", type=str, help="TLRS data file.")
-    parser.add_argument("--output", type=str, help="Output filename." )    
+    parser.add_argument("-i", "--lrs", type=str, help="File containing LRS files.")
+    parser.add_argument("-o", "--output", type=str, help="Output filename (without suffix)." )    
+    parser.add_argument("-c", "--csv", default=False, action='store_true', help="Output data to CSV rather than .h5")
 
     args = parser.parse_args()
     print(args)
@@ -99,4 +112,4 @@ if __name__ == "__main__":
             exit()
 
 
-    process_runlist(args.lrs, args.output)
+    process_runlist(args.lrs, args.output, args.csv)
