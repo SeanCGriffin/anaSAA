@@ -26,7 +26,7 @@ def fix_time(t_gps, t_unix):
     return t_unix
 
 def process_runlist(file_list, output=None, write_csv=False, n_ana = -1):
-
+    
     for index, gps_file in enumerate(file_list):
         print(f"Processing {gps_file}. Progess {index+1}/{len(file_list)}.")
 
@@ -34,17 +34,14 @@ def process_runlist(file_list, output=None, write_csv=False, n_ana = -1):
         year, month = [date[1].split('-')[0], date[1].split('-')[1]]
         print(gps_file, year, month)
 
-        
-
-        gps_df = pd.read_csv(gps_file)
-        gps_df.info()
-
-        sample = gps_df
-
-        if n_ana == -1:
-            sample = gps_df
+        if n_ana < 0:
+            gps_df = pd.read_csv(gps_file)
         else:
-            sample = gps_df.loc[0:n_ana]
+            gps_df = pd.read_csv(gps_file, nrows=n_ana)
+            
+        gps_df.info()
+       
+        sample = gps_df
 
         # Do math to get lat/lon
         x = sample.loc[:]['SGPSBA_POSITIONX']
@@ -60,14 +57,22 @@ def process_runlist(file_list, output=None, write_csv=False, n_ana = -1):
         UNIX_t += sample.loc[:]['SGPSBA_SUBSECS']
 
         # Generate new data frame for time, lat, lon.
-        print(f"Writing GPS TLL data to {output}/GPS_{year}_{month}.h5")
+        
         tll_df = pd.DataFrame(data={'time_tll': np.array([fix_time(t_gps, t_unix) for t_gps, t_unix in zip(GPS_seconds, UNIX_t)]), 
                                       'lat':lat, 
                                       'lon':lon
                                      }
                               )
         print(f"Done...")
-        tll_df.to_hdf(f"{output}/GPS_{year}_{month}.h5", "tll", mode="w")          
+        
+        if write_csv:
+            print(f"Writing GPS TLL data to {output}/GPS_{year}_{month}.csv")
+            with open(f"{output}/GPS_{year}_{month}.csv", 'w') as f:
+                tll_df.to_csv(f, index=False, sep=',')          
+            #df.to_csv(f, header=f.tell()==0, index=False, sep=',')
+        else:
+            print(f"Writing GPS TLL data to {output}/GPS_{year}_{month}.h5")
+            tll_df.to_hdf(f"{output}/GPS_{year}_{month}.h5", "tll", mode="w")          
 
     print("Done!")
     return
@@ -101,5 +106,17 @@ if __name__ == "__main__":
         with open(args.runlist, 'r') as f:
             file_list = f.readlines()
             runlist = [l.rstrip() for l in file_list]
+            
+    if args.short:
+        n_ana = args.short
+    else:
+        n_ana = -1
     
-    process_runlist(runlist, output, args.csv)
+    print("Files to analyse:")
+    for f in runlist:
+        print(f"\t\t{f}")
+        
+    print("Short analysis? {0:s}".format(f"True! {n_ana}" if n_ana != -1 else "Nope."))
+
+    
+    process_runlist(runlist, output, args.csv, n_ana)
